@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>沧州一日游行程 | 自驾游攻略</title>
+    <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-100-M/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #e67e22;
+            --accent: #16a085;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --text: #333;
+            --text-light: #6c757d;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            color: var(--text);
+            line-height: 1.6;
+            background-color: #f5f7fa;
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, rgba(74, 111, 165, 0.8) 0%, rgba(22, 160, 133, 0.8) 100%), url('https://images.unsplash.com/photo-1508804185872-d7badad00f7d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center;
+            background-size: cover;
+        }
+        
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 1.25rem;
+            top: 2.5rem;
+            height: calc(100% - 2.5rem);
+            width: 2px;
+            background-color: var(--primary);
+            opacity: 0.2;
+        }
+        
+        .weather-icon {
+            font-size: 2rem;
+            color: var(--secondary);
+        }
+        
+        .map-container {
+            height: 400px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .restaurant-card {
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .budget-item {
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+        
+        .budget-item:last-child {
+            border-bottom: none;
+        }
+        
+        .leaflet-popup-content-wrapper {
+            border-radius: 0.5rem !important;
+        }
+        
+        .route-card {
+            border-top: 3px solid var(--primary);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-car text-2xl text-blue-600 mr-2"></i>
+                <span class="text-xl font-bold text-blue-600">沧州自驾游</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#overview" class="text-gray-700 hover:text-blue-600">行程概览</a>
+                <a href="#schedule" class="text-gray-700 hover:text-blue-600">详细行程</a>
+                <a href="#map" class="text-gray-700 hover:text-blue-600">景点地图</a>
+                <a href="#tips" class="text-gray-700 hover:text-blue-600">实用信息</a>
+            </div>
+            <button class="md:hidden text-gray-700">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero 区域 -->
+    <section class="hero text-white py-16 md:py-24">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">沧州一日游行程</h1>
+                <div class="flex justify-center items-center mb-6">
+                    <div class="bg-white bg-opacity-20 rounded-full px-4 py-2 flex items-center mr-4">
+                        <i class="fas fa-calendar-day mr-2"></i>
+                        <span>2025年4月20日 (周日)</span>
+                    </div>
+                    <div class="bg-white bg-opacity-20 rounded-full px-4 py-2 flex items-center">
+                        <i class="fas fa-car mr-2"></i>
+                        <span>天津出发自驾游</span>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-20 rounded-lg p-4 mb-8">
+                    <div class="flex justify-center items-center space-x-4">
+                        <div class="weather-icon">
+                            <i class="fas fa-sun"></i>
+                        </div>
+                        <div>
+                            <p class="text-xl font-bold">晴朗，15-24°C</p>
+                            <p class="text-sm">微风，适宜出行</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xl mb-8">探索千年铁狮子的历史，品尝地道沧州美食，漫步古运河畔，体验一日精彩自驾之旅</p>
+                <a href="#overview" class="bg-white text-blue-600 font-bold px-8 py-3 rounded-full hover:bg-gray-100 transition duration-300 inline-block">
+                    查看行程 <i class="fas fa-arrow-down ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 py-12">
+        <!-- 行程概览 -->
+        <section id="overview" class="mb-16">
+            <div class="flex items-center mb-8">
+                <div class="h-1 bg-blue-500 w-12 mr-4"></div>
+                <h2 class="text-3xl font-bold">行程概览</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-4 gap-6 mb-12">
+                <div class="bg-white rounded-lg shadow-md p-6 card">
+                    <div class="text-blue-500 text-3xl mb-4">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">上午</h3>
+                    <p class="text-gray-600">天津出发，游览沧州铁狮子 & 中国贸易博物馆</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 card">
+                    <div class="text-orange-500 text-3xl mb-4">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">午餐</h3>
+                    <p class="text-gray-600">品尝沧州狮子头</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 card">
+                    <div class="text-green-500 text-3xl mb-4">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">下午</h3>
+                    <p class="text-gray-600">黄骅葡萄长廊 & 沧州老城区</p>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 card">
+                    <div class="text-purple-500 text-3xl mb-4">
+                        <i class="fas fa-moon"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">晚上</h3>
+                    <p class="text-gray-600">享用运河美食后返回天津</p>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 rounded-lg p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                    行程亮点
+                </h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="flex items-start">
+                        <div class="text-blue-500 mr-3 mt-1">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">千年铁狮子</h4>
+                            <p class="text-gray-600 text-sm">参观中国现存最古老的铸铁艺术品，了解千年历史</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="text-blue-500 mr-3 mt-1">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">地道美食</h4>
+                            <p class="text-gray-600 text-sm">品尝沧州狮子头、运河鲤鱼等特色美食</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="text-blue-500 mr-3 mt-1">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">葡萄长廊</h4>
+                            <p class="text-gray-600 text-sm">参观黄骅著名葡萄种植基地，品尝时令水果</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="text-blue-500 mr-3 mt-1">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">古运河夜景</h4>
+                            <p class="text-gray-600 text-sm">漫步古运河畔，欣赏迷人夜景</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 详细行程 -->
+        <section id="schedule" class="mb-16">
+            <div class="flex items-center mb-8">
+                <div class="h-1 bg-blue-500 w-12 mr-4"></div>
+                <h2 class="text-3xl font-bold">详细时间表</h2>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">地点</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">活动描述</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">停留时间</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">门票</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">07:30-09:00</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">天津→沧州</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">自驾前往沧州市区 (约135公里)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1.5小时</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">高速费约50元</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">09:00-10:30</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">沧州铁狮子</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">参观中国现存最古老的铸铁艺术品，了解千年历史</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1.5小时</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">免费</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">10:30-12:00</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">中国贸易博物馆</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">探索中国古代贸易历史，了解沧州作为商贸重镇的历史地位</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1.5小时</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">45元/人</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">12:00-13:30</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">狮城食府</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">午餐，品尝地道沧州狮子头和其他本地特色</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1.5小时</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">约80元/人</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">13:30-15:30</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">黄骅葡萄长廊</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">参观著名的葡萄种植基地，品尝时令水果</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2小时</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30元/人</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">15:30-17:30</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">沧州老城区</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">漫步老城，探访古街巷，感受历史文化氛围</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2小时</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">免费</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">17:30-19:00</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">运河人家餐厅</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">晚餐，享用运河特色美食</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1.5小时</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">约100元/人</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">19:00-20:30</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">运河夜景</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">漫步古运河畔，欣赏迷人夜景</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1.5小时</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">免费</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">20:30-22:00</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">沧州→天津</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">返回天津 (约135公里)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2小时</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">高速费约50元</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+        <!-- 自驾路线 -->
+        <section class="mb-16">
+            <div class="flex items-center mb-8">
+                <div class="h-1 bg-blue-500 w-12 mr-4"></div>
+                <h2 class="text-3xl font-bold">自驾路线</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow-md p-6 route-card">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">1</span>
+                        天津 → 沧州铁狮子
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-2 mt-1"></i>
+                            <span>天津市区出发，沿津沧高速(S6)行驶</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-road text-blue-500 mr-2 mt-1"></i>
+                            <span>全程约135公里，预计1小时30分钟</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-gas-pump text-blue-500 mr-2 mt-1"></i>
+                            <span>高速费约50元</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 route-card">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">2</span>
+                        沧州市内景点间
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-2 mt-1"></i>
+                            <span>铁狮子 → 中国贸易博物馆：约15分钟车程</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-2 mt-1"></i>
+                            <span>博物馆 → 黄骅葡萄长廊：约40分钟车程</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-2 mt-1"></i>
+                            <span>葡萄长廊 → 老城区：约30分钟车程</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-6 route-card">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">3</span>
+                        沧州 → 天津
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-blue-500 mr-2 mt-1"></i>
+                            <span>从沧州市区出发，沿津沧高速(S6)返回</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-road text-blue-500 mr-2 mt-1"></i>
+                            <span>全程约135公里，预计1小时30分钟</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-yellow-500 mr-2 mt-1"></i>
+                            <span>建议避开晚高峰(17:00-19:00)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-yellow-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            <strong>重要提示：</strong> 请提前检查车况，确保油箱充足。沧州部分老城区道路较窄，停车时请注意安全。建议使用导航软件实时查看路况。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    
+        <!-- 景点地图 -->
+        <section id="map" class="mb-16">
+            <div class="flex items-center mb-8">
+                <div class="h-1 bg-blue-500 w-12 mr-4"></div>
+                <h2 class="text-3xl font-bold">景点地图</h2>
+            </div>
+            
+            <div class="map-container" id="touristMap"></div>
+            
+            <div class="mt-4 grid md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h3 class="text-lg font-bold mb-2 flex items-center">
+                        <i class="fas fa-map-marker-alt text-red-500 mr-2"></i>
+                        主要景点位置
+                    </h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <span class="w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                            <span>沧州铁狮子</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
+                            <span>中国贸易博物馆</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-3 h-3 bg-green-500 rounded-full mr-2"></span>
+                            <span>黄骅葡萄长廊</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-3 h-3 bg-purple-500 rounded-full mr-2"></span>
+                            <span>沧州老城区</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md p-4">
+                    <h3 class="text-lg font-bold mb-2 flex items-center">
+                        <i class="fas fa-utensils text-orange-500 mr-2"></i>
+                        推荐餐厅位置
+                    </h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <span class="w-3 h-3 bg-orange-500 rounded-full mr-2"></span>
+                            <span>狮城食府</span>
+                        </li>
+                        <li class="flex items-center">
+                            <span class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></span>
+                            <span>运河人家餐厅</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    
+        <!-- 餐饮推荐 -->
+        <section class="mb-16">
+            <div class="flex items-center mb-8">
+                <div class="h-1 bg-blue-500 w-12 mr-4"></div>
+                <h2 class="text-3xl font-bold">餐饮推荐</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden restaurant-card">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold">狮城食府</h3>
+                                <div class="flex items-center mt-1">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <span class="text-gray-600">4.5 (328条评价)</span>
+                                </div>
+                            </div>
+                            <div class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                                <i class="fas fa-utensils mr-1"></i> 午餐
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-bold mb-2 flex items-center">
+                                <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
+                                地址
+                            </h4>
+                            <a href="https://uri.amap.com/marker?position=116.839464,38.304476&name=狮城食府" class="text-blue-600 hover:underline">
+                                沧州市运河区解放西路88号
+                            </a>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-bold mb-2 flex items-center">
+                                <i class="fas fa-phone-alt text-blue-500 mr-2"></i>
+                                电话
+                            </h4>
+                            <a href="tel:0317-3025888" class="text-gray-700 hover:text-blue-600">0317-3025888</a>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold mb-2 flex items-center">
+                                <i class="fas fa-utensil-spoon text-blue-500 mr-2"></i>
+                                特色菜
+                            </h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-gray-100 px-3 py-1 rounded-full text-sm">沧州狮子头</span>
+                                <span class="bg-gray-100 px-3 py-1 rounded-full text-sm">驴肉火烧</span>
+                                <span class="bg-gray-100 px-3 py-1 rounded-full text-sm">沧州炖鸡</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md overflow-hidden restaurant-card">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold">运河人家餐厅</h3>
+                                <div class="flex items-center mt-1">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <span class="text-gray-600">4.7 (412条评价)</span>
+                                </div>
+                            </div>
+                            <div class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                                <i class="fas fa-moon mr-1"></i> 晚餐
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-bold mb-2 flex items-center">
+                                <i class="fas fa-map-marker-alt text-blue-500 mr-2"></i>
+                                地址
+                            </h4>
+                            <a href="https://uri.amap.com/marker?position=116.857321,38.312456&name=运河人家餐厅" class="text-blue-600 hover:underline">
+                                沧州市运河区运河东岸美食街18号
+                            </a>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-bold mb-2 flex items-center">
+                                <i class="fas fa-phone-alt text-blue-500 mr-2"></i>
+                                电话
+                            </h4>
+                            <a href="tel:0317-3088666" class="text-gray-700 hover:text-blue-600">0317-3088666</a>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-bold mb-2 flex items-center">
+                                <i class="fas fa-utensil-spoon text-blue-500 mr-2"></i>
+                                特色菜
+                            </h4>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-gray-100 px-3 py-1 rounded-full text-sm">运河鲤鱼</span>
+                                <span class="bg-gray-100 px-3 py-1 rounded-full text-sm">沧州焖饼</span>
+                                <span class="bg-gray-100 px-3 py-1 rounded-full text-sm">河鲜拼盘</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    
+        <!-- 实用信息 -->
+        <section id="tips" class="mb-16">
+            <div class="flex items-center mb-8">
+                <div class="h-1 bg-blue-500 w-12 mr-4"></div>
+                <h2 class="text-3xl font-bold">实用信息</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 紧急联系电话 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-phone-alt text-red-500 mr-3"></i>
+                        紧急联系电话
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center">
+                            <div class="bg-red-100 text-red-800 p-2 rounded-full mr-3">
+                                <i class="fas fa-ambulance"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">急救电话</h4>
+                                <a href="tel:120" class="text-gray-600 hover:text-blue-600">120</a>
+                            </div>
+                        </li>
+                        <li class="flex items-center">
+                            <div class="bg-blue-100 text-blue-800 p-2 rounded-full mr-3">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">报警电话</h4>
+                                <a href="tel:110" class="text-gray-600 hover:text-blue-600">110</a>
+                            </div>
+                        </li>
+                        <li class="flex items-center">
+                            <div class="bg-yellow-100 text-yellow-800 p-2 rounded-full mr-3">
+                                <i class="fas fa-car-crash"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">交通事故</h4>
+                                <a href="tel:122" class="text-gray-600 hover:text-blue-600">122</a>
+                            </div>
+                        </li>
+                        <li class="flex items-center">
+                            <div class="bg-green-100 text-green-800 p-2 rounded-full mr-3">
+                                <i class="fas fa-road"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">高速救援</h4>
+                                <a href="tel:12122" class="text-gray-600 hover:text-blue-600">12122</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- 预算摘要 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-wallet text-green-500 mr-3"></i>
+                        预算摘要 (2人)
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between budget-item py-2">
+                            <span>高速费</span>
+                            <span class="font-bold">100元</span>
+                        </div>
+                        <div class="flex justify-between budget-item py-2">
+                            <span>油费</span>
+                            <span class="font-bold">约200元</span>
+                        </div>
+                        <div class="flex justify-between budget-item py-2">
+                            <span>午餐</span>
+                            <span class="font-bold">160元</span>
+                        </div>
+                        <div class="flex justify-between budget-item py-2">
+                            <span>晚餐</span>
+                            <span class="font-bold">200元</span>
+                        </div>
+                        <div class="flex justify-between budget-item py-2">
+                            <span>景点门票</span>
+                            <span class="font-bold">150元</span>
+                        </div>
+                        <div class="flex justify-between budget-item py-2">
+                            <span>其他消费</span>
+                            <span class="font-bold">100元</span>
+                        </div>
+                        <div class="flex justify-between pt-3 border-t border-gray-200 mt-2">
+                            <span class="font-bold">总计</span>
+                            <span class="text-xl font-bold text-blue-600">约910元</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 行李清单 -->
+            <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fas fa-bag-check text-green-500 mr-3"></i>
+                    行李清单
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span>证件类</span>
+                        <span>2件</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>身份证</span>
+                        <span>1张</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>驾驶证</span>
+                        <span>1张</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>行驶证</span>
+                        <span>1张</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span>保险单</span>
+                        <span>1张</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div>
+            <h4 class="font-bold mb-2 flex items-center">
+                <i class="fas fa-car text-blue-500 mr-2"></i>
+                车载物品
+            </h4>
+            <ul class="space-y-2">
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    充电器/数据线
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    车载手机支架
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    行车记录仪
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    应急工具包
+                </li>
+            </ul>
+        </div>
+        
+        <div>
+            <h4 class="font-bold mb-2 flex items-center">
+                <i class="fas fa-user text-blue-500 mr-2"></i>
+                个人物品
+            </h4>
+            <ul class="space-y-2">
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    防晒霜
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    帽子/太阳镜
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    轻便外套
+                </li>
+                <li class="flex items-center">
+                    <i class="fas fa-check text-green-500 mr-2"></i>
+                    相机/自拍杆
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</section>
+</main>
+
+<!-- 页脚 -->
+<footer class="bg-gray-800 text-white py-12">
+<div class="container mx-auto px-4">
+<div class="grid md:grid-cols-3 gap-8">
+    <div>
+        <h3 class="text-xl font-bold mb-4">关于行程</h3>
+        <p class="text-gray-300">本行程专为天津出发的自驾游客设计，涵盖沧州主要景点和美食，适合1日游。</p>
+    </div>
+    
+    <div>
+        <h3 class="text-xl font-bold mb-4">快速链接</h3>
+        <ul class="space-y-2">
+            <li><a href="#overview" class="text-gray-300 hover:text-white">行程概览</a></li>
+            <li><a href="#schedule" class="text-gray-300 hover:text-white">详细行程</a></li>
+            <li><a href="#map" class="text-gray-300 hover:text-white">景点地图</a></li>
+            <li><a href="#tips" class="text-gray-300 hover:text-white">实用信息</a></li>
+        </ul>
+    </div>
+    
+    <div>
+        <h3 class="text-xl font-bold mb-4">联系我们</h3>
+        <ul class="space-y-2">
+            <li class="flex items-center">
+                <i class="fas fa-envelope mr-2 text-gray-300"></i>
+                <span>contact@cangzhoutour.com</span>
+            </li>
+            <li class="flex items-center">
+                <i class="fas fa-phone-alt mr-2 text-gray-300"></i>
+                <span>400-123-4567</span>
+            </li>
+            <li class="flex items-center">
+                <i class="fab fa-weixin mr-2 text-gray-300"></i>
+                <span>沧州自驾游</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+    <p>© 2025 沧州自驾游攻略. 版权所有.</p>
+    <p class="mt-2 text-sm">本网站仅供旅游参考，实际信息可能有所变动，请以当地实际情况为准。</p>
+</div>
+</div>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+// 初始化地图
+const map = L.map('touristMap').setView([38.304476, 116.839464], 12);
+
+// 添加地图图层
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+// 添加景点标记
+const attractions = [
+{
+    name: "沧州铁狮子",
+    latlng: [38.304476, 116.839464],
+    icon: "red",
+    description: "中国现存最古老的铸铁艺术品"
+},
+{
+    name: "中国贸易博物馆",
+    latlng: [38.312456, 116.857321],
+    icon: "blue",
+    description: "展示中国古代贸易历史"
+},
+{
+    name: "黄骅葡萄长廊",
+    latlng: [38.356789, 117.342567],
+    icon: "green",
+    description: "著名的葡萄种植基地"
+},
+{
+    name: "沧州老城区",
+    latlng: [38.308765, 116.845678],
+    icon: "purple",
+    description: "感受历史文化氛围"
+},
+{
+    name: "狮城食府",
+    latlng: [38.302345, 116.842345],
+    icon: "orange",
+    description: "午餐推荐：沧州狮子头"
+},
+{
+    name: "运河人家餐厅",
+    latlng: [38.312345, 116.852345],
+    icon: "yellow",
+    description: "晚餐推荐：运河鲤鱼"
+}
+];
+
+// 图标颜色映射
+const iconColors = {
+red: "#e74c3c",
+blue: "#3498db",
+green: "#2ecc71",
+purple: "#9b59b6",
+orange: "#e67e22",
+yellow: "#f1c40f"
+};
+
+// 添加所有标记
+attractions.forEach(attraction => {
+const marker = L.marker(attraction.latlng, {
+    icon: L.divIcon({
+        className: 'custom-icon',
+        html: `<div style="background-color: ${iconColors[attraction.icon]}; width: 20px; height: 20px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">${attraction.name.charAt(0)}</div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    })
+}).addTo(map);
+
+marker.bindPopup(`
+    <div style="min-width: 200px;">
+        <h3 style="margin: 0 0 5px 0; font-weight: bold; color: ${iconColors[attraction.icon]}">${attraction.name}</h3>
+        <p style="margin: 0;">${attraction.description}</p>
+        <div style="margin-top: 10px;">
+            <a href="https://uri.amap.com/marker?position=${attraction.latlng[1]},${attraction.latlng[0]}&name=${encodeURIComponent(attraction.name)}" 
+               style="display: inline-block; background-color: ${iconColors[attraction.icon]}; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 12px;">
+                <i class="fas fa-map-marker-alt"></i> 导航
+            </a>
+        </div>
+    </div>
+`);
+
+// 默认打开铁狮子的弹窗
+if (attraction.name === "沧州铁狮子") {
+    marker.openPopup();
+}
+});
+
+// 添加路线
+const route = L.polyline(
+attractions.filter(a => a.name !== "狮城食府" && a.name !== "运河人家餐厅").map(a => a.latlng),
+{color: '#3498db', weight: 3, dashArray: '5, 5'}
+).addTo(map);
+
+// 自动调整地图视图以显示所有标记
+map.fitBounds(attractions.map(a => a.latlng), {padding: [50, 50]});
+
+// 移动端触摸优化
+map.touchZoom.enable();
+map.doubleClickZoom.disable();
+
+// 响应式调整
+window.addEventListener('resize', () => {
+map.invalidateSize();
+});
+</script>
+
+    </div>
+</body>
+</html>
+                        
+
+
