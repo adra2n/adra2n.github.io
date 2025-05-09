@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>3D Fish School Simulation (Upgraded)</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    canvas { display: block; }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 8px;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+<div id="controls">
+  <button id="toggleMusic">🔊 开启/关闭音乐</button>
+</div>
+
+<!-- 使用 type="module" 来支持 import -->
+<script type="module">
+  // 从 ESM 模块导入 Three.js 和扩展组件
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js';
+  import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
+  import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js';
+  import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/RenderPass.js';
+  import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+
+  // 场景设置
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87ceeb);
+
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 2, 10);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  // 控制器
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  // 光照
+  const light = new THREE.DirectionalLight(0xffffff, 1);
+  light.position.set(5, 10, 7.5);
+  scene.add(light);
+
+  const ambientLight = new THREE.AmbientLight(0xaaaaaa);
+  scene.add(ambientLight);
+
+  // 鱼缸材质
+  const glassMaterial = new THREE.MeshPhysicalMaterial({
+    color: 0xadd8e6,
+    metalness: 0.1,
+    roughness: 0.05,
+    transparent: true,
+    opacity: 0.6,
+    transmission: 0.9,
+    thickness: 0.2,
+    ior: 1.5,
+    clearcoat: 1,
+    clearcoatRoughness: 0.1
+  });
+
+  const tankGeometry = new THREE.BoxGeometry(6, 3, 3);
+  const tank = new THREE.Mesh(tankGeometry, glassMaterial);
+  scene.add(tank);
+
+  // 水草
+  const plantMaterial = new THREE.MeshStandardMaterial({ color: 0x228b22 });
+  for (let i = 0; i < 5; i++) {
+    const plant = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.2, 0.5), plantMaterial);
+    plant.position.set((Math.random() - 0.5) * 4, -1.5, (Math.random() - 0.5) * 2);
+    plant.rotation.y = Math.random() * Math.PI;
+    scene.add(plant);
+  }
+
+  // 水面波纹效果
+  const waterGeometry = new THREE.PlaneGeometry(6, 3);
+  const waterMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      time: { value: 0.0 },
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      uniform float time;
+      varying vec2 vUv;
+      void main() {
+        float wave = sin(vUv.x * 10.0 + time * 2.0) * 0.02;
+        vec3 waterColor = vec3(0.5, 0.8, 1.0);
+        gl_FragColor = vec4(waterColor + wave, 0.7);
+      }
+    `,
+    side: THREE.DoubleSide,
+    transparent: true
+  });
+
+  const water = new THREE.Mesh(waterGeometry, waterMaterial);
+  water.rotation.x = -Math.PI / 2;
+  water.position.y = -1.49;
+  scene.add(water);
+
+  // 加载鱼模型
+  const fishModelUrl = 'https://modelviewer.dev/shared-assets/models/Akira.glb';
+
+  class Fish {
+    constructor() {
+      this.position = new THREE.Vector3(
+        Math.random() * 4 - 2,
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1
+      );
+      this.velocity = new THREE.Vector3().randomDirection().multiplyScalar(0.02);
+      this.acceleration = new THREE.Vector3();
+      this.maxSpeed = 0.05;
+      this.maxForce = 0.005;
+
+      this.mesh = new THREE.Group();
+      this.model = null;
+
+      const loader = new GLTFLoader();
+      loader.load(fishModelUrl, gltf => {
+        this.model = gltf.scene;
+        this.model.scale.set(0.01, 0.01, 0.01);
+        this.model.rotation.y = Math.PI;
+        this.mesh.add(this.model);
+      });
+
+      this.mesh.position.copy(this.position);
+      scene.add(this.mesh);
+    }
+
+    update(fishList) {
+      if (!this.model) return;
+
+      this.applyBehaviors(fishList);
+      this.velocity.add(this.acceleration);
+      if (this.velocity.length() > this.maxSpeed) {
+        this.velocity.setLength(this.maxSpeed);
+      }
+      this.position.add(this.velocity);
+      this.acceleration.set(0, 0, 0);
+
+      // 边界反弹
+      if (Math.abs(this.position.x) > 2.8) this.velocity.x *= -1;
+      if (this.position.y > 1.4 || this.position.y < -1.4) this.velocity.y *= -1;
+      if (Math.abs(this.position.z) > 1.4) this.velocity.z *= -1;
+
+      this.mesh.position.copy(this.position);
+      this.mesh.lookAt(this.position.clone().add(this.velocity));
+    }
+
+    applyBehaviors(fishList) {
+      let separation = new THREE.Vector3();
+      let alignment = new THREE.Vector3();
+      let cohesion = new THREE.Vector3();
+      let total = 0;
+
+      for (let other of fishList) {
+        if (other === this) continue;
+        let d = this.position.distanceTo(other.position);
+        if (d < 1.0) {
+          let diff = this.position.clone().sub(other.position).normalize().divideScalar(d);
+          separation.add(diff);
+          alignment.add(other.velocity);
+          cohesion.add(other.position);
+          total++;
+        }
+      }
+
+      if (total > 0) {
+        alignment.divideScalar(total).normalize().multiplyScalar(this.maxForce);
+        cohesion.divideScalar(total).sub(this.position).normalize().multiplyScalar(this.maxForce);
+        separation.normalize().multiplyScalar(this.maxForce);
+
+        this.applyForce(separation);
+        this.applyForce(alignment);
+        this.applyForce(cohesion);
+      }
+    }
+
+    applyForce(force) {
+      this.acceleration.add(force);
+    }
+  }
+
+  const fishes = [];
+  for (let i = 0; i < 10; i++) {
+    fishes.push(new Fish());
+  }
+
+  // 后处理发光效果
+  const composer = new EffectComposer(renderer);
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  const bloomPass = new UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth, window.innerHeight),
+    1.5, 0.4, 0.85
+  );
+  composer.addPass(bloomPass);
+
+  // 动画循环
+  function animate(time) {
+    requestAnimationFrame(animate);
+    for (let fish of fishes) {
+      fish.update(fishes);
+    }
+
+    water.material.uniforms.time.value = time * 0.001;
+
+    composer.render();
+  }
+
+  animate();
+
+  // 背景音乐控制
+  const musicButton = document.getElementById('toggleMusic');
+  const bgMusic = document.createElement('audio');
+  bgMusic.src = 'https://cdn.pixabay.com/audio/2022/03/15/audio_7b92621f2c.mp3';
+  bgMusic.loop = true;
+  bgMusic.id = 'bg-music';
+  bgMusic.preload = 'auto';
+  document.body.appendChild(bgMusic);
+
+  musicButton.addEventListener('click', () => {
+    if (bgMusic.paused) {
+      bgMusic.play();
+      musicButton.textContent = "🔇 关闭音乐";
+    } else {
+      bgMusic.pause();
+      musicButton.textContent = "🔊 开启音乐";
+    }
+  });
+
+  // 窗口自适应
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+</body>
+</html>
