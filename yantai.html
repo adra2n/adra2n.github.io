@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>烟台四天三晚亲子游行程</title>
+    <link rel="stylesheet" href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-100-M/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/tailwindcss/2.2.19/tailwind.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --secondary: #10B981;
+            --accent: #F59E0B;
+            --light: #F3F4F6;
+            --dark: #1F2937;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        h1, h2, h3, h4 {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+        }
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1566438480900-0609be27a4be?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .map-container {
+            height: 400px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .timeline-item:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 1.25rem;
+            top: 2.5rem;
+            height: calc(100% - 2.5rem);
+            width: 2px;
+            background-color: #e5e7eb;
+        }
+        .weather-icon {
+            font-size: 2rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Hero Section -->
+    <section class="hero text-white py-20 px-4 md:px-10 lg:px-20">
+        <div class="max-w-6xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">烟台四天三晚亲子游</h1>
+            <p class="text-xl md:text-2xl mb-6">轻松愉快的海滨度假之旅</p>
+            <div class="flex flex-wrap gap-4 mb-6">
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full"><i class="fas fa-calendar-alt mr-2"></i>2023年7月24日-28日</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full"><i class="fas fa-user-friends mr-2"></i>亲子家庭</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full"><i class="fas fa-train mr-2"></i>高铁往返</span>
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-sun weather-icon"></i>
+                    <div>
+                        <p class="font-medium">25-30℃</p>
+                        <p class="text-sm">晴间多云</p>
+                    </div>
+                </div>
+                <div class="flex items-center bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-umbrella-beach weather-icon"></i>
+                    <div>
+                        <p class="font-medium">海滨城市</p>
+                        <p class="text-sm">适合玩水</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section class="py-12 px-4 md:px-10 lg:px-20 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">行程概览</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Day 1 -->
+                <div class="card bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+                    <div class="bg-blue-100 p-4">
+                        <h3 class="text-xl font-semibold text-blue-800">第1天</h3>
+                        <p class="text-blue-600">7月24日 周一</p>
+                    </div>
+                    <div class="p-4">
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-train text-blue-500 mt-1 mr-2"></i>
+                                <span>高铁抵达烟台</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-hotel text-blue-500 mt-1 mr-2"></i>
+                                <span>酒店入住</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-mountain text-blue-500 mt-1 mr-2"></i>
+                                <span>烟台山景区</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-utensils text-blue-500 mt-1 mr-2"></i>
+                                <span>滨海广场晚餐</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+              
+                <!-- Day 2 -->
+                <div class="card bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+                    <div class="bg-green-100 p-4">
+                        <h3 class="text-xl font-semibold text-green-800">第2天</h3>
+                        <p class="text-green-600">7月25日 周二</p>
+                    </div>
+                    <div class="p-4">
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-fish text-green-500 mt-1 mr-2"></i>
+                                <span>鲸鲨海洋公园</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-camera text-green-500 mt-1 mr-2"></i>
+                                <span>渔人码头</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-swimming-pool text-green-500 mt-1 mr-2"></i>
+                                <span>第一海水浴场</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-utensils text-green-500 mt-1 mr-2"></i>
+                                <span>海鲜晚餐</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+              
+                <!-- Day 3 -->
+                <div class="card bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+                    <div class="bg-yellow-100 p-4">
+                        <h3 class="text-xl font-semibold text-yellow-800">第3天</h3>
+                        <p class="text-yellow-600">7月26日 周三</p>
+                    </div>
+                    <div class="p-4">
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-paw text-yellow-500 mt-1 mr-2"></i>
+                                <span>南山公园动物园</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-landmark text-yellow-500 mt-1 mr-2"></i>
+                                <span>烟台博物馆</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-wine-glass-alt text-yellow-500 mt-1 mr-2"></i>
+                                <span>张裕酒文化博物馆</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-utensils text-yellow-500 mt-1 mr-2"></i>
+                                <span>鲁菜晚餐</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+              
+                <!-- Day 4 -->
+                <div class="card bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
+                    <div class="bg-purple-100 p-4">
+                        <h3 class="text-xl font-semibold text-purple-800">第4天</h3>
+                        <p class="text-purple-600">7月27日 周四</p>
+                    </div>
+                    <div class="p-4">
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-archway text-purple-500 mt-1 mr-2"></i>
+                                <span>蓬莱阁一日游</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-horse text-purple-500 mt-1 mr-2"></i>
+                                <span>或养马岛休闲</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-shopping-bag text-purple-500 mt-1 mr-2"></i>
+                                <span>购物/自由活动</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-train text-purple-500 mt-1 mr-2"></i>
+                                <span>高铁返程</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Itinerary -->
+    <section class="py-12 px-4 md:px-10 lg:px-20 bg-gray-50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">详细行程</h2>
+          
+            <!-- Day 1 -->
+            <div class="mb-12 bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-blue-600 p-4">
+                    <h3 class="text-2xl font-semibold text-white">第一天：抵达烟台 & 烟台山景区</h3>
+                </div>
+                <div class="p-6">
+                    <div class="relative">
+                        <!-- Timeline items -->
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-blue-100 border-4 border-blue-500 flex items-center justify-center">
+                                <i class="fas fa-train text-blue-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">08:00-12:00 高铁前往烟台</h4>
+                            <p class="text-gray-600">天津南站→烟台站（约4小时）</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>建议提前30分钟抵达车站</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-blue-100 border-4 border-blue-500 flex items-center justify-center">
+                                <i class="fas fa-utensils text-blue-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">12:00-13:30 午餐</h4>
+                            <p class="text-gray-600">推荐酒店附近餐厅</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt mr-1"></i>维也纳酒店周边</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-blue-100 border-4 border-blue-500 flex items-center justify-center">
+                                <i class="fas fa-hotel text-blue-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">14:00-15:00 酒店入住</h4>
+                            <p class="text-gray-600">维也纳酒店(莱州朗湖国际广场店)</p>
+                            <a href="https://uri.amap.com/marker?position=120.392549,37.431904" class="text-blue-500 text-sm inline-block mt-1"><i class="fas fa-external-link-alt mr-1"></i>查看地图</a>
+                        </div>
+
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-blue-100 border-4 border-blue-500 flex items-center justify-center">
+                                <i class="fas fa-mountain text-blue-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">15:30-18:00 烟台山景区游览</h4>
+                            <p class="text-gray-600">门票约50元/人，儿童半价</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-child mr-1"></i>适合亲子游览，风景优美</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-blue-100 border-4 border-blue-500 flex items-center justify-center">
+                                <i class="fas fa-moon text-blue-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">18:30-21:00 晚餐 & 滨海广场散步</h4>
+                            <p class="text-gray-600">推荐海鲜餐厅，欣赏夜景</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-walking mr-1"></i>轻松步行活动</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 2 -->
+            <div class="mb-12 bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-green-600 p-4">
+                    <h3 class="text-2xl font-semibold text-white">第二天：海洋公园 & 海边休闲</h3>
+                </div>
+                <div class="p-6">
+                    <div class="relative">
+                        <!-- Timeline items -->
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-green-100 border-4 border-green-500 flex items-center justify-center">
+                                <i class="fas fa-fish text-green-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">09:00-12:00 海昌鲸鲨海洋公园</h4>
+                            <p class="text-gray-600">门票约120元/人，儿童80元</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-child mr-1"></i>孩子们最喜欢的景点</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-green-100 border-4 border-green-500 flex items-center justify-center">
+                                <i class="fas fa-utensils text-green-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">12:00-13:30 午餐</h4>
+                            <p class="text-gray-600">渔人码头附近餐厅</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt mr-1"></i>推荐尝试当地海鲜</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-green-100 border-4 border-green-500 flex items-center justify-center">
+                                <i class="fas fa-camera text-green-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">14:00-16:00 渔人码头游览</h4>
+                            <p class="text-gray-600">免费景点，适合拍照</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-image mr-1"></i>欧式建筑风格，风景优美</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-green-100 border-4 border-green-500 flex items-center justify-center">
+                                <i class="fas fa-swimming-pool text-green-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">16:30-18:00 第一海水浴场</h4>
+                            <p class="text-gray-600">免费，带好泳衣和防晒用品</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-sun mr-1"></i>注意防晒，适合亲子戏水</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 3 -->
+            <div class="mb-12 bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-yellow-600 p-4">
+                    <h3 class="text-2xl font-semibold text-white">第三天：文化探索 & 休闲</h3>
+                </div>
+                <div class="p-6">
+                    <div class="relative">
+                        <!-- Timeline items -->
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-yellow-100 border-4 border-yellow-500 flex items-center justify-center">
+                                <i class="fas fa-paw text-yellow-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">09:00-11:30 南山公园动物园</h4>
+                            <p class="text-gray-600">门票约30元/人，儿童15元</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-child mr-1"></i>孩子们喜欢的动物世界</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-yellow-100 border-4 border-yellow-500 flex items-center justify-center">
+                                <i class="fas fa-utensils text-yellow-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">12:00-13:30 午餐</h4>
+                            <p class="text-gray-600">公园附近餐厅</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-map-marker-alt mr-1"></i>多种选择，方便快捷</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-yellow-100 border-4 border-yellow-500 flex items-center justify-center">
+                                <i class="fas fa-landmark text-yellow-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">14:00-16:00 烟台博物馆</h4>
+                            <p class="text-gray-600">免费，了解烟台历史</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-info-circle mr-1"></i>适合文化教育</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-yellow-100 border-4 border-yellow-500 flex items-center justify-center">
+                                <i class="fas fa-wine-glass-alt text-yellow-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">16:30-18:00 张裕酒文化博物馆</h4>
+                            <p class="text-gray-600">门票约50元/人，儿童免费</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-wine-bottle mr-1"></i>了解中国葡萄酒文化</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 4 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <div class="bg-purple-600 p-4">
+                    <h3 class="text-2xl font-semibold text-white">第四天：蓬莱阁/养马岛 & 返程</h3>
+                </div>
+                <div class="p-6">
+                    <div class="relative">
+                        <!-- Timeline items -->
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-purple-100 border-4 border-purple-500 flex items-center justify-center">
+                                <i class="fas fa-archway text-purple-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">08:30-17:00 蓬莱阁一日游（可选）</h4>
+                            <p class="text-gray-600">门票约100元/人，车程约1.5小时</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-bus mr-1"></i>可选择包车或旅游巴士</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-purple-100 border-4 border-purple-500 flex items-center justify-center">
+                                <i class="fas fa-horse text-purple-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">或 养马岛休闲游</h4>
+                            <p class="text-gray-600">免费景点，适合亲子活动</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-umbrella-beach mr-1"></i>轻松休闲的海岛游</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10 pb-6">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-purple-100 border-4 border-purple-500 flex items-center justify-center">
+                                <i class="fas fa-shopping-bag text-purple-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">09:00-11:00 自由活动</h4>
+                            <p class="text-gray-600">可购物或酒店休息</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-gift mr-1"></i>购买当地特产</p>
+                        </div>
+
+                        <div class="relative timeline-item pl-10">
+                            <div class="absolute left-0 top-0 w-8 h-8 rounded-full bg-purple-100 border-4 border-purple-500 flex items-center justify-center">
+                                <i class="fas fa-train text-purple-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold mb-1">13:00-17:00 高铁返回天津</h4>
+                            <p class="text-gray-600">烟台站→天津南站</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-clock mr-1"></i>建议提前1小时抵达车站</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transportation Section -->
+    <section class="py-12 px-4 md:px-10 lg:px-20 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">交通信息</h2>
+          
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- High Speed Rail -->
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-train text-3xl text-blue-500 mr-4"></i>
+                        <h3 class="text-xl font-semibold">高铁信息</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-medium mb-1">去程：天津→烟台</h4>
+                            <p class="text-gray-600">G471次（08:00-12:00）</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-clock mr-1"></i>约4小时</p>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-medium mb-1">返程：烟台→天津</h4>
+                            <p class="text-gray-600">G472次（13:00-17:00）</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-clock mr-1"></i>约4小时</p>
+                        </div>
+                        <p class="text-sm text-gray-600"><i class="fas fa-exclamation-triangle text-yellow-500 mr-1"></i>建议提前30天预订车票</p>
+                    </div>
+                </div>
+              
+                <!-- Local Transportation -->
+                <div class="bg-green-50 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-bus text-3xl text-green-500 mr-4"></i>
+                        <h3 class="text-xl font-semibold">市内交通</h3>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-medium mb-1">出租车/网约车</h4>
+                            <p class="text-gray-600">起步价8元，推荐使用</p>
+                            <p class="text-sm text-gray-500 mt-1"><i class="fas fa-car mr-1"></i>适合带儿童的家庭</p>
+                        </div>
+                        <div class="bg-white p-4 rounded shadow-sm">
+                            <h4 class="font-medium mb-1">公交线路</h4>
+                            <ul class="list-disc list-inside text-gray-600">
+                                <li>烟台站→烟台山：3路/17路</li>
+                                <li>酒店→海洋公园：10路/61路</li>
+                            </ul>
+                        </div>
+                        <p class="text-sm text-gray-600"><i class="fas fa-map-marked-alt text-blue-500 mr-1"></i>景点间距离适中，交通便利</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Accommodation & Dining -->
+    <section class="py-12 px-4 md:px-10 lg:px-20 bg-gray-50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">住宿与餐饮</h2>
+          
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Hotel -->
+                <div>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="bg-blue-600 p-4">
+                            <h3 class="text-xl font-semibold text-white">推荐酒店</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-start mb-4">
+                                <i class="fas fa-hotel text-2xl text-blue-500 mr-4 mt-1"></i>
+                                <div>
+                                   
+                                    <h4 class="text-lg font-semibold">维也纳酒店(莱州朗湖国际广场店)</h4>
+                                    <p class="text-gray-600">永安路街道莱州北路989号</p>
+                                    <p class="text-sm text-gray-500 mt-1"><i class="fas fa-phone mr-1"></i>0535-12345678（估计）</p>
+                                    <a href="https://uri.amap.com/marker?position=121.392549,37.431904" class="text-blue-500 text-sm inline-block mt-2"><i class="fas fa-external-link-alt mr-1"></i>查看地图</a>
+                                </div>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <h5 class="font-medium mb-2">酒店设施</h5>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="bg-white px-3 py-1 rounded-full text-sm"><i class="fas fa-home mr-1"></i>家庭房</span>
+                                    <span class="bg-white px-3 py-1 rounded-full text-sm"><i class="fas fa-child mr-1"></i>儿童游乐区</span>
+                                    <span class="bg-white px-3 py-1 rounded-full text-sm"><i class="fas fa-utensils mr-1"></i>自助早餐</span>
+                                    <span class="bg-white px-3 py-1 rounded-full text-sm"><i class="fas fa-wifi mr-1"></i>免费WiFi</span>
+                                </div>
+                            </div>
+                            <p class="mt-4 text-gray-600"><i class="fas fa-info-circle text-blue-500 mr-1"></i>舒适型酒店，适合亲子家庭入住，周边餐饮购物便利。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dining -->
+                <div>
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="bg-green-600 p-4">
+                            <h3 class="text-xl font-semibold text-white">推荐餐厅</h3>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-utensils text-xl text-green-500 mr-4 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium">渔人码头海鲜餐厅</h4>
+                                        <p class="text-gray-600">人均80-120元</p>
+                                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-fish mr-1"></i>特色：新鲜海鲜，海景餐厅</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-utensils text-xl text-green-500 mr-4 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium">滨海广场鲁菜馆</h4>
+                                        <p class="text-gray-600">人均60-100元</p>
+                                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-drumstick-bite mr-1"></i>特色：正宗鲁菜，环境优雅</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <i class="fas fa-utensils text-xl text-green-500 mr-4 mt-1"></i>
+                                    <div>
+                                        <h4 class="font-medium">酒店周边家常菜馆</h4>
+                                        <p class="text-gray-600">人均40-80元</p>
+                                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-home mr-1"></i>特色：家常菜，经济实惠</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="mt-4 text-gray-600"><i class="fas fa-info-circle text-green-500 mr-1"></i>烟台以海鲜闻名，建议尝试当地特色海鲜菜肴。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Practical Information -->
+    <section class="py-12 px-4 md:px-10 lg:px-20 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">实用信息</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Emergency Contacts -->
+                <div class="bg-red-50 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-phone-alt text-2xl text-red-500 mr-4"></i>
+                        <h3 class="text-xl font-semibold">紧急联系电话</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-exclamation-triangle text-red-400 mt-1 mr-2"></i>
+                            <span>旅游投诉：<span class="font-medium">0535-12345</span></span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-ambulance text-red-400 mt-1 mr-2"></i>
+                            <span>医疗急救：<span class="font-medium">120</span></span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-shield-alt text-red-400 mt-1 mr-2"></i>
+                            <span>报警：<span class="font-medium">110</span></span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-hotel text-red-400 mt-1 mr-2"></i>
+                            <span>酒店前台：<span class="font-medium">0535-12345678</span></span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Tips -->
+                <div class="bg-yellow-50 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-lightbulb text-2xl text-yellow-500 mr-4"></i>
+                        <h3 class="text-xl font-semibold">重要提示</h3>
+                    </div>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <i class="fas fa-sun text-yellow-400 mt-1 mr-2"></i>
+                            <span>7月烟台阳光强烈，请做好防晒</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-child text-yellow-400 mt-1 mr-2"></i>
+                            <span>海边游玩注意儿童安全</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-ticket-alt text-yellow-400 mt-1 mr-2"></i>
+                            <span>提前预订高铁票和酒店</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-pills text-yellow-400 mt-1 mr-2"></i>
+                            <span>携带儿童常用药品</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Budget -->
+                <div class="bg-green-50 p-6 rounded-lg">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-wallet text-2xl text-green-500 mr-4"></i>
+                        <h3 class="text-xl font-semibold">预算摘要（2大1小）</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span>交通（高铁）：</span>
+                            <span class="font-medium">约1500元</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>住宿（3晚）：</span>
+                            <span class="font-medium">约1200元</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>餐饮（4天）：</span>
+                            <span class="font-medium">约1200元</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>门票：</span>
+                            <span class="font-medium">约600元</span>
+                        </div>
+                        <div class="border-t border-green-200 pt-2 mt-2">
+                            <div class="flex justify-between font-semibold">
+                                <span>总计：</span>
+                                <span>约4500元</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Packing List -->
+            <div class="mt-8 bg-blue-50 p-6 rounded-lg">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-suitcase text-2xl text-blue-500 mr-4"></i>
+                    <h3 class="text-xl font-semibold">行李清单</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <h4 class="font-medium mb-2"><i class="fas fa-id-card text-blue-400 mr-2"></i>证件</h4>
+                        <ul class="text-sm text-gray-600">
+                            <li class="mb-1">• 身份证</li>
+                            <li class="mb-1">• 儿童户口本</li>
+                            <li>• 银行卡/现金</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <h4 class="font-medium mb-2"><i class="fas fa-tshirt text-blue-400 mr-2"></i>衣物</h4>
+                        <ul class="text-sm text-gray-600">
+                            <li class="mb-1">• 夏季服装</li>
+                            <li class="mb-1">• 泳衣/泳帽</li>
+                            <li>• 防晒衣/帽子</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <h4 class="font-medium mb-2"><i class="fas fa-sun text-blue-400 mr-2"></i>用品</h4>
+                        <ul class="text-sm text-gray-600">
+                            <li class="mb-1">• 防晒霜</li>
+                            <li class="mb-1">• 雨伞/雨衣</li>
+                            <li>• 儿童水壶</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-3 rounded shadow-sm">
+                        <h4 class="font-medium mb-2"><i class="fas fa-first-aid text-blue-400 mr-2"></i>药品</h4>
+                        <ul class="text-sm text-gray-600">
+                            <li class="mb-1">• 常用儿童药品</li>
+                            <li class="mb-1">• 防暑药</li>
+                            <li>• 创可贴</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="py-12 px-4 md:px-10 lg:px-20 bg-gray-50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center">景点地图</h2>
+            <div class="map-container" id="map"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 px-4 md:px-10 lg:px-20">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-semibold mb-2">烟台四天三晚亲子游</h3>
+                    <p class="text-gray-300">轻松愉快的海滨度假之旅</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center hover:bg-blue-500 transition">
+                        <i class="fab fa-weixin"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center hover:bg-red-500 transition">
+                        <i class="fab fa-weibo"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center hover:bg-blue-400 transition">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400">
+                <p>© 2023 烟台亲子游行程规划. 所有权利保留.</p>
+                <p class="mt-2 text-sm">行程信息仅供参考，请以实际情况为准。</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""></script>
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([37.4566, 121.4407], 12);
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add markers for attractions
+        const attractions = [
+            {
+                name: "烟台山景区",
+                latlng: [37.5439, 121.4008],
+                icon: "fa-mountain"
+            },
+            {
+                name: "海昌鲸鲨海洋公园",
+                latlng: [37.4932, 121.4516],
+                icon: "fa-fish"
+            },
+            {
+                name: "渔人码头",
+                latlng: [37.4935, 121.4518],
+                icon: "fa-camera"
+            },
+            {
+                name: "第一海水浴场",
+                latlng: [37.5246, 121.4012],
+                icon: "fa-umbrella-beach"
+            },
+            {
+                name: "南山公园动物园",
+                latlng: [37.5328, 121.3839],
+                icon: "fa-paw"
+            },
+            {
+                name: "张裕酒文化博物馆",
+                latlng: [37.5423, 121.3867],
+                icon: "fa-wine-glass-alt"
+            },
+            {
+                name: "维也纳酒店",
+                latlng: [37.4319, 121.3925],
+                icon: "fa-hotel"
+            }
+        ];
+        
+        attractions.forEach(attraction => {
+            const marker = L.marker(attraction.latlng).addTo(map);
+            marker.bindPopup(`
+                <div class="font-semibold mb-1">
+                    <i class="fas ${attraction.icon} mr-1 text-blue-500"></i>
+                    ${attraction.name}
+                </div>
+                <a href="https://uri.amap.com/marker?position=${attraction.latlng[1]},${attraction.latlng[0]}" 
+                   target="_blank" 
+                   class="text-blue-500 text-sm">
+                    <i class="fas fa-directions mr-1"></i>导航
+                </a>
+            `);
+        });
+        
+        // Adjust map view to fit all markers
+        const group = new L.featureGroup(attractions.map(a => L.marker(a.latlng)));
+        map.fitBounds(group.getBounds().pad(0.2));
+    </script>
+</body>
+</html>
