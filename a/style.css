@@ -1,0 +1,136 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    text-align: center;
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.score-board {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.score-board span {
+    margin: 0 10px;
+}
+
+.current-player {
+    font-size: 18px;
+    font-weight: bold;
+    color: #555;
+}
+
+.game-controls {
+    margin-bottom: 20px;
+}
+
+#restart-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+#restart-btn:hover {
+    background-color: #45a049;
+}
+
+#game-mode {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.game-board {
+    display: inline-block;
+    background-color: #DDB88C;
+    border: 2px solid #333;
+    position: relative;
+}
+
+.cell {
+    width: 30px;
+    height: 30px;
+    border-right: 1px solid #333;
+    border-bottom: 1px solid #333;
+    position: absolute;
+    cursor: pointer;
+}
+
+.cell:last-child {
+    border-right: none;
+}
+
+.cell:nth-child(15n):nth-child(-n+225) {
+    border-bottom: none;
+}
+
+.cell:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.piece {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    z-index: 10;
+}
+
+.black-piece {
+    background: radial-gradient(circle at 30% 30%, #666, #000);
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.white-piece {
+    background: radial-gradient(circle at 30% 30%, #fff, #ddd);
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.game-status {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    min-height: 25px;
+}
+
+.win-message {
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: green;
+    min-height: 30px;
+}
