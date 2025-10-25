@@ -3,78 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>舒尔特方格专注力训练</title>
+    <title>舒尔特专注力训练游戏</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>舒尔特方格专注力训练</h1>
-        
-        <!-- 游戏主界面 -->
-        <div id="main-menu">
-            <h2>请选择难度等级</h2>
-            <button id="easy-btn" class="difficulty-btn">初级 (3x3)</button>
-            <button id="medium-btn" class="difficulty-btn">中级 (4x4)</button>
-            <button id="hard-btn" class="difficulty-btn">高级 (5x5)</button>
-        </div>
+        <header>
+            <h1>舒尔特专注力训练游戏</h1>
+            <p>点击数字从1到最大值，测试你的专注力和反应速度！</p>
+        </header>
 
-        <!-- 用户名输入界面 -->
-        <div id="username-input" class="hidden">
-            <h2>请输入您的昵称</h2>
-            <input type="text" id="username" placeholder="请输入昵称" maxlength="20">
-            <button id="start-game-btn">开始游戏</button>
+        <!-- 开始界面 -->
+        <div id="start-screen" class="screen active">
+            <div class="form-group">
+                <label for="nickname">请输入您的昵称：</label>
+                <input type="text" id="nickname" placeholder="您的昵称">
+            </div>
+            <div class="form-group">
+                <label for="difficulty">选择难度：</label>
+                <select id="difficulty">
+                    <option value="3">简单 (3x3)</option>
+                    <option value="4">中等 (4x4)</option>
+                    <option value="5">困难 (5x5)</option>
+                    <option value="6">专家 (6x6)</option>
+                </select>
+            </div>
+            <button id="start-button">开始游戏</button>
+            <button id="ranking-button">查看排行榜</button>
         </div>
 
         <!-- 游戏界面 -->
-        <div id="game-container" class="hidden">
+        <div id="game-screen" class="screen">
             <div class="game-info">
-                <span>玩家: <span id="current-player"></span></span>
-                <span>难度: <span id="current-difficulty"></span></span>
-                <span>用时: <span id="timer">0.00</span>s</span>
+                <div class="player-info">
+                    <span>玩家：</span>
+                    <span id="player-name"></span>
+                </div>
+                <div class="difficulty-info">
+                    <span>难度：</span>
+                    <span id="game-difficulty"></span>
+                </div>
+                <div class="timer">
+                    <span>时间：</span>
+                    <span id="time-display">00:00.00</span>
+                </div>
+                <div class="next-number">
+                    <span>下一个：</span>
+                    <span id="next-num">1</span>
+                </div>
             </div>
-            <div id="grid-container"></div>
+            <div id="grid-container" class="grid-container">
+                <!-- 舒尔特方格将在这里动态生成 -->
+            </div>
+            <div class="game-controls">
+                <button id="pause-button">暂停</button>
+                <button id="exit-button">退出</button>
+            </div>
         </div>
 
         <!-- 游戏结束界面 -->
-        <div id="game-over" class="hidden">
-            <h2>游戏完成!</h2>
-            <p>恭喜你完成了本次挑战!</p>
-            <p>用时: <span id="final-time"></span> 秒</p>
-            <button id="back-to-menu">返回主菜单</button>
+        <div id="result-screen" class="screen">
+            <h2>恭喜完成！</h2>
+            <div class="result-info">
+                <p>玩家：<span id="result-name"></span></p>
+                <p>难度：<span id="result-difficulty"></span></p>
+                <p>用时：<span id="result-time"></span></p>
+            </div>
+            <button id="play-again-button">再玩一次</button>
+            <button id="back-to-start-button">返回开始</button>
         </div>
 
         <!-- 排行榜界面 -->
-        <div id="leaderboard" class="hidden">
+        <div id="ranking-screen" class="screen">
             <h2>排行榜</h2>
-            <div class="leaderboard-controls">
-                <select id="leaderboard-level">
-                    <option value="all">所有难度</option>
-                    <option value="3">初级 (3x3)</option>
-                    <option value="4">中级 (4x4)</option>
-                    <option value="5">高级 (5x5)</option>
-                </select>
-                <button id="show-leaderboard">刷新排行榜</button>
+            <div class="ranking-tabs">
+                <button class="tab-btn active" data-difficulty="all">全部</button>
+                <button class="tab-btn" data-difficulty="3">简单 (3x3)</button>
+                <button class="tab-btn" data-difficulty="4">中等 (4x4)</button>
+                <button class="tab-btn" data-difficulty="5">困难 (5x5)</button>
+                <button class="tab-btn" data-difficulty="6">专家 (6x6)</button>
             </div>
-            <table id="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>排名</th>
-                        <th>昵称</th>
-                        <th>难度</th>
-                        <th>用时(秒)</th>
-                        <th>完成时间</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard-body">
-                    <!-- 排行榜数据将在这里显示 -->
-                </tbody>
-            </table>
-            <button id="back-to-menu-from-leaderboard">返回主菜单</button>
+            <div id="ranking-list" class="ranking-list">
+                <!-- 排行榜数据将在这里动态生成 -->
+                <p class="no-data">暂无排行数据</p>
+            </div>
+            <button id="back-button">返回</button>
         </div>
 
-        <!-- 导航按钮 -->
-        <div class="nav-buttons">
-            <button id="show-leaderboard-btn">查看排行榜</button>
+        <!-- 暂停界面 -->
+        <div id="pause-overlay" class="overlay">
+            <div class="pause-content">
+                <h2>游戏已暂停</h2>
+                <button id="resume-button">继续游戏</button>
+                <button id="quit-button">退出游戏</button>
+            </div>
         </div>
     </div>
 

@@ -1,288 +1,401 @@
-class SchulteGridGame {
-    constructor() {
-        this.gridSize = 3; // 默认网格大小
-        this.sequence = []; // 序列
-        this.currentNumber = 1; // 当前应该点击的数字
-        this.timer = 0; // 计时器
-        this.timerInterval = null; // 计时器句柄
-        this.username = ''; // 玩家昵称
-        this.isGameActive = false; // 游戏是否正在进行
-        
-        // 获取DOM元素
-        this.elements = {
-            mainMenu: document.getElementById('main-menu'),
-            usernameInput: document.getElementById('username-input'),
-            gameContainer: document.getElementById('game-container'),
-            gameOver: document.getElementById('game-over'),
-            leaderboard: document.getElementById('leaderboard'),
-            username: document.getElementById('username'),
-            gridContainer: document.getElementById('grid-container'),
-            timer: document.getElementById('timer'),
-            currentPlayer: document.getElementById('current-player'),
-            currentDifficulty: document.getElementById('current-difficulty'),
-            finalTime: document.getElementById('final-time'),
-            leaderboardBody: document.getElementById('leaderboard-body'),
-            leaderboardLevel: document.getElementById('leaderboard-level')
-        };
-        
-        this.initEventListeners();
-        this.loadLeaderboard();
+// 游戏状态管理
+const gameState = {
+    isPlaying: false,
+    isPaused: false,
+    nickname: '',
+    difficulty: 3,
+    gridSize: 3,
+    currentNumber: 1,
+    startTime: 0,
+    elapsedTime: 0,
+    timerInterval: null,
+    rankingData: []
+};
+
+// DOM元素引用
+const elements = {
+    // 屏幕元素
+    startScreen: document.getElementById('start-screen'),
+    gameScreen: document.getElementById('game-screen'),
+    resultScreen: document.getElementById('result-screen'),
+    rankingScreen: document.getElementById('ranking-screen'),
+    pauseOverlay: document.getElementById('pause-overlay'),
+    
+    // 开始界面元素
+    nicknameInput: document.getElementById('nickname'),
+    difficultySelect: document.getElementById('difficulty'),
+    startButton: document.getElementById('start-button'),
+    rankingButton: document.getElementById('ranking-button'),
+    
+    // 游戏界面元素
+    playerName: document.getElementById('player-name'),
+    gameDifficulty: document.getElementById('game-difficulty'),
+    timeDisplay: document.getElementById('time-display'),
+    nextNum: document.getElementById('next-num'),
+    gridContainer: document.getElementById('grid-container'),
+    pauseButton: document.getElementById('pause-button'),
+    exitButton: document.getElementById('exit-button'),
+    
+    // 结果界面元素
+    resultName: document.getElementById('result-name'),
+    resultDifficulty: document.getElementById('result-difficulty'),
+    resultTime: document.getElementById('result-time'),
+    playAgainButton: document.getElementById('play-again-button'),
+    backToStartButton: document.getElementById('back-to-start-button'),
+    
+    // 排行榜界面元素
+    tabButtons: document.querySelectorAll('.tab-btn'),
+    rankingList: document.getElementById('ranking-list'),
+    backButton: document.getElementById('back-button'),
+    
+    // 暂停界面元素
+    resumeButton: document.getElementById('resume-button'),
+    quitButton: document.getElementById('quit-button')
+};
+
+// 初始化游戏
+function init() {
+    // 加载排行榜数据
+    loadRankingData();
+    
+    // 绑定事件监听器
+    bindEventListeners();
+    
+    // 验证开始按钮
+    validateStartButton();
+}
+
+// 绑定事件监听器
+function bindEventListeners() {
+    // 开始界面事件
+    elements.nicknameInput.addEventListener('input', validateStartButton);
+    elements.startButton.addEventListener('click', startGame);
+    elements.rankingButton.addEventListener('click', showRankingScreen);
+    
+    // 游戏界面事件
+    elements.pauseButton.addEventListener('click', pauseGame);
+    elements.exitButton.addEventListener('click', exitGame);
+    
+    // 结果界面事件
+    elements.playAgainButton.addEventListener('click', playAgain);
+    elements.backToStartButton.addEventListener('click', showStartScreen);
+    
+    // 排行榜界面事件
+    elements.tabButtons.forEach(button => {
+        button.addEventListener('click', () => filterRankingByDifficulty(button.dataset.difficulty));
+    });
+    elements.backButton.addEventListener('click', showStartScreen);
+    
+    // 暂停界面事件
+    elements.resumeButton.addEventListener('click', resumeGame);
+    elements.quitButton.addEventListener('click', exitGame);
+}
+
+// 验证开始按钮
+function validateStartButton() {
+    elements.startButton.disabled = elements.nicknameInput.value.trim() === '';
+}
+
+// 开始游戏
+function startGame() {
+    // 获取玩家输入
+    gameState.nickname = elements.nicknameInput.value.trim();
+    gameState.difficulty = parseInt(elements.difficultySelect.value);
+    gameState.gridSize = gameState.difficulty;
+    
+    // 重置游戏状态
+    gameState.isPlaying = true;
+    gameState.isPaused = false;
+    gameState.currentNumber = 1;
+    gameState.elapsedTime = 0;
+    
+    // 更新游戏信息显示
+    elements.playerName.textContent = gameState.nickname;
+    elements.gameDifficulty.textContent = `${gameState.gridSize}x${gameState.gridSize}`;
+    elements.nextNum.textContent = gameState.currentNumber;
+    elements.timeDisplay.textContent = '00:00.00';
+    
+    // 生成舒尔特方格
+    generateGrid();
+    
+    // 切换屏幕
+    showGameScreen();
+    
+    // 开始计时
+    startTimer();
+}
+
+// 生成舒尔特方格
+function generateGrid() {
+    elements.gridContainer.innerHTML = '';
+    
+    // 设置网格样式
+    elements.gridContainer.style.gridTemplateColumns = `repeat(${gameState.gridSize}, 1fr)`;
+    elements.gridContainer.style.gridTemplateRows = `repeat(${gameState.gridSize}, 1fr)`;
+    
+    // 生成数字数组
+    const numbers = [];
+    const totalNumbers = gameState.gridSize * gameState.gridSize;
+    for (let i = 1; i <= totalNumbers; i++) {
+        numbers.push(i);
     }
     
-    initEventListeners() {
-        // 难度选择按钮
-        document.getElementById('easy-btn').addEventListener('click', () => this.selectDifficulty(3));
-        document.getElementById('medium-btn').addEventListener('click', () => this.selectDifficulty(4));
-        document.getElementById('hard-btn').addEventListener('click', () => this.selectDifficulty(5));
-        
-        // 开始游戏按钮
-        document.getElementById('start-game-btn').addEventListener('click', () => this.startGame());
-        
-        // 返回主菜单按钮
-        document.getElementById('back-to-menu').addEventListener('click', () => this.showMainMenu());
-        document.getElementById('back-to-menu-from-leaderboard').addEventListener('click', () => this.showMainMenu());
-        
-        // 显示排行榜按钮
-        document.getElementById('show-leaderboard-btn').addEventListener('click', () => this.showLeaderboard());
-        document.getElementById('show-leaderboard').addEventListener('click', () => this.showLeaderboard());
-        
-        // 用户名输入框回车事件
-        this.elements.username.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') {
-                this.startGame();
-            }
-        });
-    }
+    // 随机打乱数字
+    shuffleArray(numbers);
     
-    selectDifficulty(size) {
-        this.gridSize = size;
-        this.elements.usernameInput.classList.remove('hidden');
-        this.elements.mainMenu.classList.add('hidden');
-        this.elements.username.focus();
-    }
+    // 创建网格项
+    numbers.forEach(number => {
+        const gridItem = document.createElement('div');
+        gridItem.classList.add('grid-item');
+        gridItem.textContent = number;
+        gridItem.dataset.number = number;
+        
+        // 添加点击事件
+        gridItem.addEventListener('click', () => handleGridItemClick(gridItem));
+        
+        elements.gridContainer.appendChild(gridItem);
+    });
+}
+
+// 处理网格项点击
+function handleGridItemClick(gridItem) {
+    if (gameState.isPaused) return;
     
-    startGame() {
-        this.username = this.elements.username.value.trim();
-        if (!this.username) {
-            alert('请输入昵称！');
-            return;
+    const clickedNumber = parseInt(gridItem.dataset.number);
+    
+    // 检查是否是正确的数字
+    if (clickedNumber === gameState.currentNumber) {
+        gridItem.classList.add('correct');
+        gameState.currentNumber++;
+        
+        // 更新下一个数字显示
+        elements.nextNum.textContent = gameState.currentNumber;
+        
+        // 检查游戏是否结束
+        const totalNumbers = gameState.gridSize * gameState.gridSize;
+        if (gameState.currentNumber > totalNumbers) {
+            endGame();
         }
-        
-        // 设置游戏状态
-        this.currentNumber = 1;
-        this.timer = 0;
-        this.elements.timer.textContent = '0.00';
-        this.elements.currentPlayer.textContent = this.username;
-        
-        // 根据难度设置显示文本
-        const difficultyText = {
-            3: '初级 (3x3)',
-            4: '中级 (4x4)',
-            5: '高级 (5x5)'
-        };
-        this.elements.currentDifficulty.textContent = difficultyText[this.gridSize];
-        
-        // 切换到游戏界面
-        this.elements.usernameInput.classList.add('hidden');
-        this.elements.gameContainer.classList.remove('hidden');
-        
-        // 生成并显示游戏网格
-        this.generateGrid();
-        this.startTimer();
-        this.isGameActive = true;
+    } else {
+        // 错误的数字
+        gridItem.classList.add('clicked');
+        setTimeout(() => {
+            gridItem.classList.remove('clicked');
+        }, 200);
     }
+}
+
+// 开始计时器
+function startTimer() {
+    gameState.startTime = Date.now() - gameState.elapsedTime;
+    gameState.timerInterval = setInterval(updateTimer, 10);
+}
+
+// 更新计时器显示
+function updateTimer() {
+    gameState.elapsedTime = Date.now() - gameState.startTime;
+    const timeStr = formatTime(gameState.elapsedTime);
+    elements.timeDisplay.textContent = timeStr;
+}
+
+// 格式化时间
+function formatTime(ms) {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    const centiseconds = Math.floor((ms % 1000) / 10);
     
-    generateGrid() {
-        // 生成序列
-        const totalCells = this.gridSize * this.gridSize;
-        this.sequence = Array.from({length: totalCells}, (_, i) => i + 1);
-        
-        // 随机打乱序列
-        for (let i = this.sequence.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [this.sequence[i], this.sequence[j]] = [this.sequence[j], this.sequence[i]];
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+}
+
+// 暂停游戏
+function pauseGame() {
+    if (!gameState.isPlaying || gameState.isPaused) return;
+    
+    gameState.isPaused = true;
+    clearInterval(gameState.timerInterval);
+    elements.pauseOverlay.classList.add('active');
+}
+
+// 恢复游戏
+function resumeGame() {
+    if (!gameState.isPlaying || !gameState.isPaused) return;
+    
+    gameState.isPaused = false;
+    elements.pauseOverlay.classList.remove('active');
+    startTimer();
+}
+
+// 退出游戏
+function exitGame() {
+    // 停止计时器
+    clearInterval(gameState.timerInterval);
+    
+    // 重置游戏状态
+    gameState.isPlaying = false;
+    gameState.isPaused = false;
+    
+    // 隐藏所有屏幕，显示开始屏幕
+    elements.pauseOverlay.classList.remove('active');
+    showStartScreen();
+}
+
+// 游戏结束
+function endGame() {
+    // 停止计时器
+    clearInterval(gameState.timerInterval);
+    gameState.isPlaying = false;
+    
+    // 保存成绩
+    saveScore();
+    
+    // 更新结果显示
+    elements.resultName.textContent = gameState.nickname;
+    elements.resultDifficulty.textContent = `${gameState.gridSize}x${gameState.gridSize}`;
+    elements.resultTime.textContent = formatTime(gameState.elapsedTime);
+    
+    // 显示结果屏幕
+    showResultScreen();
+}
+
+// 保存成绩
+function saveScore() {
+    const score = {
+        nickname: gameState.nickname,
+        difficulty: gameState.difficulty,
+        time: gameState.elapsedTime,
+        timestamp: Date.now()
+    };
+    
+    // 添加到排行榜数据
+    gameState.rankingData.push(score);
+    
+    // 按时间排序（相同难度内）
+    gameState.rankingData.sort((a, b) => {
+        if (a.difficulty !== b.difficulty) {
+            return a.difficulty - b.difficulty;
         }
-        
-        // 创建网格
-        this.elements.gridContainer.innerHTML = '';
-        this.elements.gridContainer.style.gridTemplateColumns = `repeat(${this.gridSize}, 1fr)`;
-        
-        for (let i = 0; i < totalCells; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'grid-cell';
-            cell.textContent = this.sequence[i];
-            cell.dataset.number = this.sequence[i];
-            
-            cell.addEventListener('click', () => this.handleCellClick(cell));
-            this.elements.gridContainer.appendChild(cell);
+        return a.time - b.time;
+    });
+    
+    // 保存到本地存储
+    localStorage.setItem('shulteRanking', JSON.stringify(gameState.rankingData));
+}
+
+// 加载排行榜数据
+function loadRankingData() {
+    const savedData = localStorage.getItem('shulteRanking');
+    if (savedData) {
+        gameState.rankingData = JSON.parse(savedData);
+    }
+}
+
+// 显示排行榜
+function displayRanking(filterDifficulty = 'all') {
+    elements.rankingList.innerHTML = '';
+    
+    // 过滤数据
+    let filteredData = gameState.rankingData;
+    if (filterDifficulty !== 'all') {
+        filteredData = gameState.rankingData.filter(item => item.difficulty === parseInt(filterDifficulty));
+    }
+    
+    // 按难度和时间排序
+    filteredData.sort((a, b) => {
+        if (a.difficulty !== b.difficulty) {
+            return a.difficulty - b.difficulty;
         }
-        
-        // 标记第一个要点击的单元格
-        this.updateCurrentCellHighlight();
+        return a.time - b.time;
+    });
+    
+    if (filteredData.length === 0) {
+        const noDataEl = document.createElement('p');
+        noDataEl.classList.add('no-data');
+        noDataEl.textContent = '暂无排行数据';
+        elements.rankingList.appendChild(noDataEl);
+        return;
     }
     
-    handleCellClick(cell) {
-        if (!this.isGameActive) return;
+    // 显示排行数据
+    filteredData.forEach((item, index) => {
+        const rankingItem = document.createElement('div');
+        rankingItem.classList.add('ranking-item');
         
-        const clickedNumber = parseInt(cell.dataset.number);
+        rankingItem.innerHTML = `
+            <div class="rank">${index + 1}</div>
+            <div class="player">${item.nickname}</div>
+            <div class="difficulty">${item.difficulty}x${item.difficulty}</div>
+            <div class="time">${formatTime(item.time)}</div>
+        `;
         
-        if (clickedNumber === this.currentNumber) {
-            cell.classList.add('completed');
-            this.currentNumber++;
-            
-            if (this.currentNumber > this.gridSize * this.gridSize) {
-                // 游戏完成
-                this.endGame();
-            } else {
-                // 更新高亮
-                this.updateCurrentCellHighlight();
-            }
+        elements.rankingList.appendChild(rankingItem);
+    });
+}
+
+// 按难度过滤排行榜
+function filterRankingByDifficulty(difficulty) {
+    // 更新标签按钮状态
+    elements.tabButtons.forEach(button => {
+        button.classList.remove('active');
+        if (button.dataset.difficulty === difficulty) {
+            button.classList.add('active');
         }
-    }
+    });
     
-    updateCurrentCellHighlight() {
-        // 移除之前的所有高亮
-        document.querySelectorAll('.grid-cell').forEach(cell => {
-            cell.classList.remove('current');
-        });
-        
-        // 高亮当前应该点击的数字
-        const currentCell = document.querySelector(`.grid-cell[data-number="${this.currentNumber}"]`);
-        if (currentCell) {
-            currentCell.classList.add('current');
+    // 显示过滤后的排行榜
+    displayRanking(difficulty);
+}
+
+// 再玩一次
+function playAgain() {
+    startGame();
+}
+
+// 屏幕切换函数
+function showStartScreen() {
+    hideAllScreens();
+    elements.startScreen.classList.add('active');
+}
+
+function showGameScreen() {
+    hideAllScreens();
+    elements.gameScreen.classList.add('active');
+}
+
+function showResultScreen() {
+    hideAllScreens();
+    elements.resultScreen.classList.add('active');
+}
+
+function showRankingScreen() {
+    hideAllScreens();
+    elements.rankingScreen.classList.add('active');
+    
+    // 重置标签和显示排行榜
+    elements.tabButtons.forEach(button => {
+        button.classList.remove('active');
+        if (button.dataset.difficulty === 'all') {
+            button.classList.add('active');
         }
-    }
-    
-    startTimer() {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-        }
-        
-        this.timerInterval = setInterval(() => {
-            this.timer += 0.01;
-            this.elements.timer.textContent = this.timer.toFixed(2);
-        }, 10);
-    }
-    
-    endGame() {
-        this.isGameActive = false;
-        clearInterval(this.timerInterval);
-        
-        // 保存成绩
-        this.saveScore();
-        
-        // 显示游戏结束界面
-        this.elements.finalTime.textContent = this.timer.toFixed(2);
-        this.elements.gameContainer.classList.add('hidden');
-        this.elements.gameOver.classList.remove('hidden');
-    }
-    
-    saveScore() {
-        // 获取已有的排行榜数据
-        let leaderboard = JSON.parse(localStorage.getItem('schulteLeaderboard') || '[]');
-        
-        // 添加新纪录
-        const newRecord = {
-            username: this.username,
-            gridSize: this.gridSize,
-            time: parseFloat(this.timer.toFixed(2)),
-            date: new Date().toLocaleDateString('zh-CN')
-        };
-        
-        leaderboard.push(newRecord);
-        
-        // 按时间排序（升序）
-        leaderboard.sort((a, b) => a.time - b.time);
-        
-        // 只保留前100条记录
-        if (leaderboard.length > 100) {
-            leaderboard = leaderboard.slice(0, 100);
-        }
-        
-        // 保存到localStorage
-        localStorage.setItem('schulteLeaderboard', JSON.stringify(leaderboard));
-    }
-    
-    loadLeaderboard() {
-        return JSON.parse(localStorage.getItem('schulteLeaderboard') || '[]');
-    }
-    
-    showLeaderboard() {
-        this.elements.mainMenu.classList.add('hidden');
-        this.elements.gameOver.classList.add('hidden');
-        this.elements.leaderboard.classList.remove('hidden');
-        this.renderLeaderboard();
-    }
-    
-    renderLeaderboard() {
-        const leaderboard = this.loadLeaderboard();
-        const selectedLevel = this.elements.leaderboardLevel.value;
-        
-        // 过滤数据
-        let filteredData = leaderboard;
-        if (selectedLevel !== 'all') {
-            filteredData = leaderboard.filter(record => record.gridSize == selectedLevel);
-        }
-        
-        // 显示前20条记录
-        const displayData = filteredData.slice(0, 20);
-        
-        // 渲染表格
-        this.elements.leaderboardBody.innerHTML = '';
-        
-        if (displayData.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = '<td colspan="5">暂无记录</td>';
-            this.elements.leaderboardBody.appendChild(row);
-            return;
-        }
-        
-        displayData.forEach((record, index) => {
-            const row = document.createElement('tr');
-            
-            // 根据难度设置显示文本
-            const difficultyText = {
-                3: '初级',
-                4: '中级',
-                5: '高级'
-            };
-            
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${record.username}</td>
-                <td>${difficultyText[record.gridSize]}</td>
-                <td>${record.time.toFixed(2)}</td>
-                <td>${record.date}</td>
-            `;
-            
-            this.elements.leaderboardBody.appendChild(row);
-        });
-    }
-    
-    showMainMenu() {
-        // 隐藏所有界面
-        this.elements.usernameInput.classList.add('hidden');
-        this.elements.gameContainer.classList.add('hidden');
-        this.elements.gameOver.classList.add('hidden');
-        this.elements.leaderboard.classList.add('hidden');
-        
-        // 显示主菜单
-        this.elements.mainMenu.classList.remove('hidden');
-        
-        // 重置用户名输入
-        this.elements.username.value = '';
-        
-        // 停止计时器
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
-        }
-        
-        this.isGameActive = false;
+    });
+    displayRanking('all');
+}
+
+// 隐藏所有屏幕
+function hideAllScreens() {
+    elements.startScreen.classList.remove('active');
+    elements.gameScreen.classList.remove('active');
+    elements.resultScreen.classList.remove('active');
+    elements.rankingScreen.classList.remove('active');
+    elements.pauseOverlay.classList.remove('active');
+}
+
+// 工具函数：随机打乱数组
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
 }
 
 // 页面加载完成后初始化游戏
-document.addEventListener('DOMContentLoaded', () => {
-    window.game = new SchulteGridGame();
-});
+document.addEventListener('DOMContentLoaded', init);
